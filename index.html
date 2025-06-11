@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SHS Grade Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+  <div class="max-w-xl mx-auto bg-white p-8 rounded shadow-md border-t-8" style="border-color: #097931;">
+    <h1 class="text-2xl font-bold mb-6 text-center text-[#097931]">SHS Grade Calculator</h1>
+
+    <div class="mb-4">
+      <label class="block font-semibold mb-1">Select Subject Type:</label>
+      <select id="subjectType" class="w-full border rounded px-3 py-2">
+        <option value="core">Core Subjects</option>
+        <option value="academic_other">Academic Track (All Other Subjects)</option>
+        <option value="academic_special">Academic Track (Work Immersion / Research / Exhibit)</option>
+        <option value="tvl">TVL / Sports / Arts and Design Track</option>
+      </select>
+    </div>
+
+    <!-- Written Work -->
+    <div class="mb-4">
+      <label class="font-semibold block">Written Work</label>
+      <div class="flex space-x-2 mt-1">
+        <input type="number" id="wwScore" placeholder="Your Score" class="w-1/2 border rounded px-3 py-2" />
+        <input type="number" id="wwHigh" placeholder="Highest Score" class="w-1/2 border rounded px-3 py-2" />
+      </div>
+    </div>
+
+    <!-- Performance Task -->
+    <div class="mb-4">
+      <label class="font-semibold block">Performance Task</label>
+      <div class="flex space-x-2 mt-1">
+        <input type="number" id="ptScore" placeholder="Your Score" class="w-1/2 border rounded px-3 py-2" />
+        <input type="number" id="ptHigh" placeholder="Highest Score" class="w-1/2 border rounded px-3 py-2" />
+      </div>
+    </div>
+
+    <!-- Quarterly Assessment -->
+    <div class="mb-4">
+      <label class="font-semibold block">Quarterly Assessment</label>
+      <div class="flex space-x-2 mt-1">
+        <input type="number" id="qaScore" placeholder="Your Score" class="w-1/2 border rounded px-3 py-2" />
+        <input type="number" id="qaHigh" placeholder="Highest Score" class="w-1/2 border rounded px-3 py-2" />
+      </div>
+    </div>
+
+    <button onclick="calculateGrade()" class="w-full bg-[#097931] text-white py-2 rounded font-semibold hover:bg-green-700">
+      Compute Grade
+    </button>
+
+    <div id="result" class="mt-6 text-center text-lg font-medium text-gray-800"></div>
+  </div>
+
+  <script>
+    const weights = {
+      core: { ww: 0.25, pt: 0.50, qa: 0.25 },
+      academic_other: { ww: 0.25, pt: 0.45, qa: 0.30 },
+      academic_special: { ww: 0.35, pt: 0.40, qa: 0.25 },
+      tvl: { ww: 0.20, pt: 0.60, qa: 0.20 }
+    };
+
+    function getTransmutedGrade(initial) {
+      const ranges = [
+        { min: 100, max: 100, grade: 100 },
+        { min: 98.40, max: 99.99, grade: 99 },
+        { min: 96.80, max: 98.39, grade: 98 },
+        { min: 95.20, max: 96.79, grade: 97 },
+        { min: 93.60, max: 95.19, grade: 96 },
+        { min: 92.00, max: 93.59, grade: 95 },
+        { min: 90.40, max: 91.99, grade: 94 },
+        { min: 88.80, max: 90.39, grade: 93 },
+        { min: 87.20, max: 88.79, grade: 92 },
+        { min: 85.60, max: 87.19, grade: 91 },
+        { min: 84.00, max: 85.59, grade: 90 },
+        { min: 82.40, max: 83.99, grade: 89 },
+        { min: 80.80, max: 82.39, grade: 88 },
+        { min: 79.20, max: 80.79, grade: 87 },
+        { min: 77.60, max: 79.19, grade: 86 },
+        { min: 76.00, max: 77.59, grade: 85 },
+        { min: 74.40, max: 75.99, grade: 84 },
+        { min: 72.80, max: 74.39, grade: 83 },
+        { min: 71.20, max: 72.79, grade: 82 },
+        { min: 69.60, max: 71.19, grade: 81 },
+        { min: 68.00, max: 69.59, grade: 80 },
+        { min: 66.40, max: 67.99, grade: 79 },
+        { min: 64.80, max: 66.39, grade: 78 },
+        { min: 63.20, max: 64.79, grade: 77 },
+        { min: 61.60, max: 63.19, grade: 76 },
+        { min: 60.00, max: 61.59, grade: 75 },
+        { min: 56.00, max: 59.99, grade: 74 },
+        { min: 52.00, max: 55.99, grade: 73 },
+        { min: 48.00, max: 51.99, grade: 72 },
+        { min: 44.00, max: 47.99, grade: 71 },
+        { min: 40.00, max: 43.99, grade: 70 },
+        { min: 36.00, max: 39.99, grade: 69 },
+        { min: 32.00, max: 35.99, grade: 68 },
+        { min: 28.00, max: 31.99, grade: 67 },
+        { min: 24.00, max: 27.99, grade: 66 },
+        { min: 20.00, max: 23.99, grade: 65 },
+        { min: 16.00, max: 19.99, grade: 64 },
+        { min: 12.00, max: 15.99, grade: 63 },
+        { min: 8.00, max: 11.99, grade: 62 },
+        { min: 4.00, max: 7.99, grade: 61 },
+        { min: 0.00, max: 3.99, grade: 60 }
+      ];
+
+      for (let i = 0; i < ranges.length; i++) {
+        if (initial >= ranges[i].min && initial <= ranges[i].max) {
+          return ranges[i].grade;
+        }
+      }
+
+      return 60; // fallback
+    }
+
+    function calculateGrade() {
+      const type = document.getElementById('subjectType').value;
+      const { ww, pt, qa } = weights[type];
+
+      const wwScore = (+document.getElementById('wwScore').value / +document.getElementById('wwHigh').value) * 100 || 0;
+      const ptScore = (+document.getElementById('ptScore').value / +document.getElementById('ptHigh').value) * 100 || 0;
+      const qaScore = (+document.getElementById('qaScore').value / +document.getElementById('qaHigh').value) * 100 || 0;
+
+      const initial = wwScore * ww + ptScore * pt + qaScore * qa;
+      const transmuted = getTransmutedGrade(initial);
+
+      document.getElementById('result').innerHTML = `
+        <p>Initial Grade: <span class="font-semibold">${initial.toFixed(2)}</span></p>
+        <p>Transmuted Grade: <span class="text-[#097931] text-2xl font-bold">${transmuted}</span></p>
+      `;
+    }
+  </script>
+
+</body>
+</html>
