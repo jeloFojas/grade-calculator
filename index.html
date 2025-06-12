@@ -117,22 +117,39 @@
     }
 
     function calculateGrade() {
-      const type = document.getElementById('subjectType').value;
-      const { ww, pt, qa } = weights[type];
+    const type = document.getElementById('subjectType').value;
+    const { ww, pt, qa } = weights[type];
 
-      const wwScore = (+document.getElementById('wwScore').value / +document.getElementById('wwHigh').value) * 100 || 0;
-      const ptScore = (+document.getElementById('ptScore').value / +document.getElementById('ptHigh').value) * 100 || 0;
-      const qaScore = (+document.getElementById('qaScore').value / +document.getElementById('qaHigh').value) * 100 || 0;
+    const wwScore = +document.getElementById('wwScore').value;
+    const wwHigh = +document.getElementById('wwHigh').value;
+    const ptScore = +document.getElementById('ptScore').value;
+    const ptHigh = +document.getElementById('ptHigh').value;
+    const qaScore = +document.getElementById('qaScore').value;
+    const qaHigh = +document.getElementById('qaHigh').value;
 
-      const initial = wwScore * ww + ptScore * pt + qaScore * qa;
-      const transmuted = getTransmutedGrade(initial);
-
+    // Validate inputs
+    if (
+      wwScore > wwHigh || ptScore > ptHigh || qaScore > qaHigh
+    ) {
       document.getElementById('result').innerHTML = `
-        <p>Initial Grade: <span class="font-semibold">${initial.toFixed(2)}</span></p>
-        <p>Transmuted Grade: <span class="text-[#097931] text-2xl font-bold">${transmuted}</span></p>
+        <span class="text-red-600 font-semibold">Error:</span> Total score cannot exceed the Highest Possible Score.
       `;
+      return;
     }
-  </script>
+
+    const wwPercent = (wwScore / wwHigh) * 100 || 0;
+    const ptPercent = (ptScore / ptHigh) * 100 || 0;
+    const qaPercent = (qaScore / qaHigh) * 100 || 0;
+
+    const initial = wwPercent * ww + ptPercent * pt + qaPercent * qa;
+    const transmuted = getTransmutedGrade(initial);
+
+    document.getElementById('result').innerHTML = `
+      Initial Grade: ${initial.toFixed(2)} <br>
+      Transmuted Grade: <span class="text-[#097931] text-2xl">${transmuted}</span>
+    `;
+  }
+</script>
 
 </body>
 </html>
